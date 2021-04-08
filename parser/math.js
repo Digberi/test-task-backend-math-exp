@@ -15,12 +15,12 @@ const operators = {
   ')': { priority: 1 },
 }
 
-const checkParenthesis = (expression) => {
-  const quantityLeft = (expression.match(/\(/g) || []).length
-  const quantityRight = (expression.match(/\)/g) || []).length
-
-  if (quantityLeft !== quantityRight) {
-    throw new Error(`There is an unclosed parenthesis : ${expression}`)
+const comparisonPriority = (stack, el) => {
+  const lastOfStack = stack[stack.length - 1]
+  if (stackIsEmpty(stack) || operators[el].priority > operators[lastOfStack].priority) {
+    return true
+  } else {
+    return false
   }
 }
 
@@ -30,29 +30,18 @@ const checkWrongSymbol = (symbol) => {
   }
 }
 
-const prepareNegativeNumber = (arr) => {
-  const minus = []
+const checkParenthesis = (expression) => {
+  const quantityLeft = (expression.match(/\(/g) || []).length
+  const quantityRight = (expression.match(/\)/g) || []).length
 
-  for (let i = 0; i < arr.length; i++) {
-    if (
-      arr[i] === '-' && //находим минус
-      (i === 0 || (arr[i - 1] in operators && arr[i - 1] !== ')')) && //Если он первый или перед ним другой оператор
-      isNumeric(arr[i + 1]) //Если сразу после него число
-    ) {
-      arr[i + 1] = -arr[i + 1] //меняем знак у числа идущего за минусом
-      minus.push(i) //запоминаем минусыб которые "прилепили"
-    }
+  if (quantityLeft !== quantityRight) {
+    throw new Error(`There is an unclosed parenthesis : ${expression}`)
   }
-  for (let i = minus.length - 1; i >= 0; i--) {
-    arr.splice(minus[i], 1)
-  } // удаляем минусы, которые "прилепили" к числам
-  return arr
-} // Просто очень хотелось, чтобы работало и с отрицательными числами
+}
 
-const prepareExpression = (expression) => {
-  checkParenthesis(expression)
+const deleteSpacesAndCreateArray = (expression) => expression.replace(/\s/g, '').split('')
 
-  expression = expression.replace(/\s/g, '').split('')
+const parseNumber = (expression) => {
   const arrayExpression = []
   let number = ''
   expression.forEach((el) => {
@@ -71,23 +60,29 @@ const prepareExpression = (expression) => {
     arrayExpression.push(parseInt(number))
     number = ''
   }
-  return prepareNegativeNumber(arrayExpression) // возвращает массив без пробелов и c объединенными цифрами в отрицательные числа
+  return arrayExpression
 }
 
-const comparisonPriority = (stack, el) => {
-  const lastOfStack = stack[stack.length - 1]
-  if (
-    stackIsEmpty(stack) ||
-    operators[el].priority > operators[lastOfStack].priority
-  ) {
-    return true
-  } else {
-    return false
+const negativeNumberHendler = (expressionArray) => {
+  const minus = []
+
+  for (let i = 0; i < expressionArray.length; i++) {
+    if (
+      expressionArray[i] === '-' &&
+      (i === 0 || (expressionArray[i - 1] in operators && expressionArray[i - 1] !== ')')) &&
+      isNumeric(expressionArray[i + 1])
+    ) {
+      expressionArray[i + 1] = -expressionArray[i + 1]
+      minus.push(i)
+    }
   }
-}
+  for (let i = minus.length - 1; i >= 0; i--) {
+    expressionArray.splice(minus[i], 1)
+  }
+  return expressionArray
+} // Просто очень хотелось, чтобы работало и с отрицательными числами
 
-const toReversePolishNotation = (expression) => {
-  const expressionArray = prepareExpression(expression)
+const toReversePolishNotation = (expressionArray) => {
   const resultArray = []
   const stack = []
   expressionArray.forEach((el) => {
@@ -114,9 +109,9 @@ const toReversePolishNotation = (expression) => {
   return resultArray
 }
 
-const calculateReversePolishNotation = (arrExpression) => {
+const calculateReversePolishNotation = (expressionArray) => {
   const stack = []
-  arrExpression.forEach((token) => {
+  expressionArray.forEach((token) => {
     if (token in operators) {
       let [y, x] = [stack.pop(), stack.pop()]
       stack.push(operators[token].calc(x, y))
@@ -128,8 +123,12 @@ const calculateReversePolishNotation = (arrExpression) => {
 }
 
 const calculateResult = (expression) => {
-  const arrExpression = toReversePolishNotation(expression)
-  const result = calculateReversePolishNotation(arrExpression)
+  checkParenthesis(expression)
+  const arrayWithoutSpaces = deleteSpacesAndCreateArray(expression)
+  const arrayWithHundledNumbers = parseNumber(arrayWithoutSpaces)
+  const arrayWithNegativeNumbers = negativeNumberHendler(arrayWithHundledNumbers)
+  const arrayReversePolishNotation = toReversePolishNotation(arrayWithNegativeNumbers)
+  const result = calculateReversePolishNotation(arrayReversePolishNotation)
   return result
 }
 
