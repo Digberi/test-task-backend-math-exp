@@ -30,6 +30,25 @@ const checkWrongSymbol = (symbol) => {
   }
 }
 
+const prepareNegativeNumber = (arr) => {
+  const minus = []
+
+  for (let i = 0; i < arr.length; i++) {
+    if (
+      arr[i] === '-' && //находим минус
+      (i === 0 || (arr[i - 1] in operators && arr[i - 1] !== ')')) && //Если он первый или перед ним другой оператор
+      isNumeric(arr[i + 1]) //Если сразу после него число
+    ) {
+      arr[i + 1] = -arr[i + 1] //меняем знак у числа идущего за минусом
+      minus.push(i) //запоминаем минусыб которые "прилепили"
+    }
+  }
+  for (let i = minus.length - 1; i >= 0; i--) {
+    arr.splice(minus[i], 1)
+  } // удаляем минусы, которые "прилепили" к числам
+  return arr
+} // Просто очень хотелось, чтобы работало и с отрицательными числами
+
 const prepareExpression = (expression) => {
   checkParenthesis(expression)
 
@@ -52,7 +71,7 @@ const prepareExpression = (expression) => {
     arrayExpression.push(parseInt(number))
     number = ''
   }
-  return arrayExpression // возвращает массив без пробелов и c объединенными цифрами в числа
+  return prepareNegativeNumber(arrayExpression) // возвращает массив без пробелов и c объединенными цифрами в отрицательные числа
 }
 
 const comparisonPriority = (stack, el) => {
