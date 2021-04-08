@@ -39,7 +39,16 @@ const checkParenthesis = (expression) => {
   }
 }
 
-const deleteSpacesAndCreateArray = (expression) => expression.replace(/\s/g, '').split('')
+const deleteSpaces = (expression) => expression.replace(/\s/g, '')
+
+const addMultiplicationSigns = (expression) => {
+  return expression
+    .replace(/\)\(/g, ')*(')
+    .replace(/(\d)\(/g, '$1*(')
+    .replace(/\)(\d)/g, ')*$1')
+}
+
+const transformToArray = (expression) => expression.split('')
 
 const parseNumber = (expression) => {
   const arrayExpression = []
@@ -63,7 +72,7 @@ const parseNumber = (expression) => {
   return arrayExpression
 }
 
-const negativeNumberHendler = (expressionArray) => {
+const negativeNumberHandler = (expressionArray) => {
   const minus = []
 
   for (let i = 0; i < expressionArray.length; i++) {
@@ -124,9 +133,11 @@ const calculateReversePolishNotation = (expressionArray) => {
 
 const calculateResult = (expression) => {
   checkParenthesis(expression)
-  const arrayWithoutSpaces = deleteSpacesAndCreateArray(expression)
-  const arrayWithHundledNumbers = parseNumber(arrayWithoutSpaces)
-  const arrayWithNegativeNumbers = negativeNumberHendler(arrayWithHundledNumbers)
+  const expressionWithoutSpace = deleteSpaces(expression)
+  const expWithCorrectMultiplaly = addMultiplicationSigns(expressionWithoutSpace)
+  const transformedToArray = transformToArray(expWithCorrectMultiplaly)
+  const arrayWithHandledNumbers = parseNumber(transformedToArray)
+  const arrayWithNegativeNumbers = negativeNumberHandler(arrayWithHandledNumbers)
   const arrayReversePolishNotation = toReversePolishNotation(arrayWithNegativeNumbers)
   const result = calculateReversePolishNotation(arrayReversePolishNotation)
   return result
