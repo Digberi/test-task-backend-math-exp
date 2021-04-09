@@ -12,7 +12,7 @@ test('Operator *', () => {
 test('Operator /', () => {
   expect(calculateResult('42/6')).toBe(7)
 })
-test('expression with negative numbers', () => {
+test('Expression with negative numbers', () => {
   expect(calculateResult('42*-7')).toBe(-294)
 })
 test('Check priority of operation in simple expression', () => {
