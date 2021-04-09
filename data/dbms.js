@@ -15,9 +15,9 @@ const getResults = async () => {
     results: [],
   }
   if (fs.existsSync(pathToDB)) {
-    await readData().then((data) => {
-      object.results = data.split('\n').map((el) => parseFloat(el))
-    })
+    const data = await readData()
+    object.results = data.split('\n').map((el) => parseFloat(el))
+    console.log(data)
   }
 
   return object
