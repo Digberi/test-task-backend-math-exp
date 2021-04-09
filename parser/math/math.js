@@ -2,6 +2,10 @@ const isNumeric = (num) => !isNaN(num)
 
 const stackIsEmpty = (stack) => !stack.length
 
+const isDivision = (sing) => sing === '/'
+
+const isZero = (number) => number === 0
+
 // ')'- конечно правая скобка никак не исользуется,
 //даже чуть мешает, при подготовке отрицательных чисел,
 // но всё-таки когда её нет у меня глаз дергается,
@@ -26,7 +30,7 @@ const comparisonPriority = (stack, el) => {
 
 const checkWrongSymbol = (symbol) => {
   if (!(isNumeric(symbol) || symbol in operators)) {
-    throw new Error(`Unexpected symbol: ${symbol} `)
+    throw new Error(`Unexpected symbol: ${symbol}`)
   }
 }
 
@@ -35,7 +39,7 @@ const checkParenthesis = (expression) => {
   const quantityRight = (expression.match(/\)/g) || []).length
 
   if (quantityLeft !== quantityRight) {
-    throw new Error(`There is an unclosed parenthesis : ${expression}`)
+    throw new Error(`There is an unclosed parenthesis: ${expression}`)
   }
 }
 
@@ -118,11 +122,12 @@ const toReversePolishNotation = (expressionArray) => {
   return resultArray
 }
 
-const calculateReversePolishNotation = (expressionArray) => {
+const calculateReversePolishNotation = (expressionArray, expression) => {
   const stack = []
   expressionArray.forEach((token) => {
     if (token in operators) {
       let [y, x] = [stack.pop(), stack.pop()]
+      if (isDivision(token) && isZero(y)) throw new Error(`Division by zero :${expression}`)
       stack.push(operators[token].calc(x, y))
     } else {
       stack.push(token)
@@ -139,7 +144,7 @@ const calculateResult = (expression) => {
   const arrayWithHandledNumbers = parseNumber(transformedToArray)
   const arrayWithNegativeNumbers = negativeNumberHandler(arrayWithHandledNumbers)
   const arrayReversePolishNotation = toReversePolishNotation(arrayWithNegativeNumbers)
-  const result = calculateReversePolishNotation(arrayReversePolishNotation)
+  const result = calculateReversePolishNotation(arrayReversePolishNotation, expression)
   return result
 }
 

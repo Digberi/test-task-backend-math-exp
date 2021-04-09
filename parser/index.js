@@ -1,4 +1,4 @@
-const calculateResult = require('./math')
+const calculateResult = require('./math/math')
 
 const parser = (JSON) => {
   const results = []
